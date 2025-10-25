@@ -1,0 +1,43 @@
+#!/bin/bash
+# ABOUTME: Configuration template for Claude TMUX Orchestration
+# Copy this file to config/config.sh and customize for your project
+
+# Project Configuration
+PROJECT_NAME="your-project-name"
+PROJECT_ROOT="/path/to/your/project"
+
+# TMUX Configuration
+TMUX_SESSION_NAME="${PROJECT_NAME}-dev"
+TMUX_IMPLEMENTER_WINDOW="0"
+TMUX_MANAGER_WINDOW="1"
+TMUX_TESTING_WINDOW="2"
+
+# Quality Gate Configuration
+ENABLE_ESLINT=true
+ENABLE_TYPESCRIPT=true
+ENABLE_TESTS=true
+ENABLE_COVERAGE=true
+
+# Coverage Thresholds
+COVERAGE_THRESHOLD=80
+
+# NPM Scripts (customize to match your package.json)
+LINT_SCRIPT="lint"
+TYPE_CHECK_SCRIPT="type-check"
+TEST_SCRIPT="test"
+COVERAGE_SCRIPT="test:coverage"
+
+# Git Configuration
+AUTO_COMMIT=false
+COMMIT_MESSAGE_PREFIX="🤖"
+
+# Journal MCP Configuration (optional)
+ENABLE_JOURNAL_MCP=false
+JOURNAL_MCP_PATH="/path/to/journal-mcp"
+
+# Claude Configuration
+CLAUDE_CLI_PATH="claude"
+
+# Deployment Configuration (optional)
+DEPLOYMENT_URL=""
+ENABLE_E2E_TESTS=false

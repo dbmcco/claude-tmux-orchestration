@@ -2,7 +2,13 @@
 
 **Multi-agent AI development orchestration using TMUX and Claude Code CLI**
 
-This project documents an architecture for coordinating multiple Claude Code CLI and Codex instances via TMUX for automated, TDD-enforced development workflows. The system enables Claude to act as a project manager, delegating tasks to specialized sub-agents running in dedicated TMUX windows while maintaining strict quality gates.
+[![Status](https://img.shields.io/badge/status-ready%20for%20testing-green)]()
+[![Version](https://img.shields.io/badge/version-1.0-blue)]()
+[![License](https://img.shields.io/badge/license-MIT-blue)]()
+
+This project provides a complete, working implementation for coordinating multiple Claude Code CLI instances via TMUX for automated, TDD-enforced development workflows. The system enables Claude to act as a project manager, delegating tasks to specialized sub-agents running in dedicated TMUX windows while maintaining strict quality gates.
+
+**Status**: ✅ **Implementation complete** - Extracted from production use in lfw-draftforge-v1, generalized for any project, and ready for testing.
 
 ## Overview
 
@@ -127,149 +133,201 @@ Manager: [validates tests still pass] "Run quality gates."
 
 ## Installation
 
+### Quick Start
+
+```bash
+# Clone repository
+git clone https://github.com/yourusername/tmux-agent-orchestration.git
+cd tmux-agent-orchestration
+
+# Run interactive setup
+./setup.sh
+
+# Validate installation
+./validate-setup.sh
+
+# Create tmux session
+./scripts/tmux-spawn-session.sh --attach
+```
+
+**Full installation guide**: See [INSTALLATION.md](INSTALLATION.md)
+
 ### Prerequisites
 
 - TMUX installed (`brew install tmux` on macOS)
-- Claude Code CLI configured
-- Git repository with quality gate scripts
-
-### Setup
-
-1. Clone this repository:
-```bash
-git clone https://github.com/yourusername/claude-tmux-orchestration.git
-cd claude-tmux-orchestration
-```
-
-2. Review the architecture documentation:
-```bash
-cat TMUX_CLAUDE_CICD_ARCHITECTURE.md
-```
-
-3. Set up your project with quality gates:
-```bash
-# Example package.json scripts
-{
-  "scripts": {
-    "quality:check": "npm run lint && npm run type-check && npm test && npm run test:coverage",
-    "lint": "eslint src --max-warnings 0",
-    "type-check": "tsc --noEmit",
-    "test": "jest",
-    "test:coverage": "jest --coverage --coverageThreshold='{\"global\":{\"lines\":80}}'"
-  }
-}
-```
+- Git version control
+- Node.js and npm (optional, for JavaScript/TypeScript projects)
+- Claude Code CLI (optional, for AI agent integration)
 
 ## Usage
 
-### Manual Workflow (Current Implementation)
+### Orchestration Commands
 
-1. **Start TMUX session**:
+The agent orchestrator provides a simple CLI for coordinating agents:
+
 ```bash
-tmux new-session -s project
-tmux new-window -t project:1 -n manager
-tmux new-window -t project:2 -n testing
+# Brief implementer with task
+./scripts/agent-orchestrator.sh brief "Implement user authentication following TDD"
+
+# Monitor implementer progress
+./scripts/agent-orchestrator.sh monitor 0
+
+# Validate quality gates
+./scripts/agent-orchestrator.sh validate
+
+# Execute commit (after quality gates pass)
+./scripts/agent-orchestrator.sh commit "feat: add user authentication"
+
+# Request E2E tests
+./scripts/agent-orchestrator.sh e2e https://your-deployment.com
+
+# Show help
+./scripts/agent-orchestrator.sh help
 ```
 
-2. **Initialize agents in each window**:
-- Window 0: Start implementer Claude/Codex session
-- Window 1: Start manager Claude Code CLI (this becomes the coordinator)
-- Window 2: Start testing Claude Code CLI
+### TMUX Session Management
 
-3. **Manager coordinates development**:
 ```bash
-# From window 1 (manager)
-tmux send-keys -t project:0 "Implement feature X following TDD" Enter
+# Create new session
+./scripts/tmux-spawn-session.sh
 
-# Monitor progress
-tmux capture-pane -t project:0 -p | tail -50
+# Create and attach immediately
+./scripts/tmux-spawn-session.sh --attach
+
+# Monitor specific window
+./scripts/tmux-monitor.sh 0 50  # Window 0, last 50 lines
+
+# Delegate command to window
+./scripts/tmux-delegate.sh 0 "npm test"
 ```
 
-### Proposed Git Hook Integration (Future)
+### Git Hook Integration
 
-The architecture document outlines future `.claude/hooks/` integration:
+The setup script can install pre-commit and post-commit hooks:
 
-- `pre-push.sh`: Spawn TMUX session, verify quality gates
-- `post-deployment.sh`: Trigger E2E tests on deployment
-- `agent-orchestrator.sh`: Core TMUX coordination logic
+- `pre-commit.sh`: Runs quality gates before every commit
+- `post-commit.sh`: Logs commit information and triggers post-commit workflows
+- `quality-gates.sh`: Validates ESLint, TypeScript, tests, and coverage
 
-See `TMUX_CLAUDE_CICD_ARCHITECTURE.md` for complete integration specs.
+Hooks are installed in `.claude/hooks/` and linked to `.git/hooks/`.
 
 ## Configuration
 
-### Project Structure (Proposed)
+### Project Structure
 
 ```
-your-project/
-├── .claude/
-│   ├── hooks/
-│   │   ├── pre-commit.sh
-│   │   ├── pre-push.sh
-│   │   ├── post-deployment.sh
-│   │   └── agent-orchestrator.sh
-│   │
-│   ├── agents/
-│   │   ├── manager.md
-│   │   ├── implementer.md
-│   │   └── testing-manager.md
-│   │
-│   └── scripts/
-│       ├── tmux-spawn-implementer.sh
-│       ├── tmux-spawn-testing.sh
-│       └── tmux-monitor.sh
+claude-tmux-orchestration/
+├── config/
+│   ├── config.sh.example      # ✅ Configuration template
+│   └── config.sh              # ✅ Your configuration (created by setup)
 │
-└── package.json (with quality gate scripts)
+├── hooks/
+│   ├── quality-gates.sh       # ✅ Quality gate enforcement
+│   ├── pre-commit.sh          # ✅ Pre-commit validation
+│   └── post-commit.sh         # ✅ Post-commit workflow
+│
+├── scripts/
+│   ├── tmux-spawn-session.sh  # ✅ Create tmux session
+│   ├── tmux-monitor.sh        # ✅ Monitor window output
+│   ├── tmux-delegate.sh       # ✅ Send commands to windows
+│   └── agent-orchestrator.sh  # ✅ Core coordination logic
+│
+├── tests/
+│   └── test-tmux-basic.sh     # ✅ Basic functionality tests
+│
+├── setup.sh                   # ✅ Interactive setup script
+├── validate-setup.sh          # ✅ Installation validator
+├── README.md                  # This file
+├── INSTALLATION.md            # ✅ Detailed installation guide
+├── TESTING.md                 # ✅ Testing procedures
+└── TMUX_CLAUDE_CICD_ARCHITECTURE.md  # Architecture documentation
 ```
 
-### Quality Gate Script Example
+**Legend**: ✅ = Implemented and working
+
+### Configuration Example
+
+The `config/config.sh` file controls all behavior:
 
 ```bash
-#!/bin/bash
-# .claude/hooks/quality-gates.sh
+# Project Configuration
+PROJECT_NAME="your-project-name"
+PROJECT_ROOT="/path/to/your/project"
 
-echo "🔍 Running quality gates..."
+# TMUX Configuration
+TMUX_SESSION_NAME="${PROJECT_NAME}-dev"
+TMUX_IMPLEMENTER_WINDOW="0"
+TMUX_MANAGER_WINDOW="1"
+TMUX_TESTING_WINDOW="2"
 
-npm run lint || exit 1
-npm run type-check || exit 1
-npm test || exit 1
-npm run test:coverage || exit 1
+# Quality Gate Configuration
+ENABLE_ESLINT=true
+ENABLE_TYPESCRIPT=true
+ENABLE_TESTS=true
+ENABLE_COVERAGE=true
 
-echo "✅ All quality gates passed"
+# NPM Scripts (match your package.json)
+LINT_SCRIPT="lint"
+TYPE_CHECK_SCRIPT="type-check"
+TEST_SCRIPT="test"
+COVERAGE_SCRIPT="test:coverage"
 ```
 
 ## Testing Status
 
-### Current Phase: Prompt Testing
+### Implementation Complete ✅
 
-- ✅ Architecture documented
-- ⏳ Testing manager prompt behavior
-- ⏳ Validating TDD enforcement
-- ⏳ Measuring TMUX coordination reliability
+- ✅ **Architecture documented** - Complete specification in TMUX_CLAUDE_CICD_ARCHITECTURE.md
+- ✅ **Working scripts extracted** - Quality gates, hooks, and orchestration from lfw-draftforge-v1
+- ✅ **Scripts generalized** - Configuration system for any project
+- ✅ **Setup automation** - Interactive installer and validator
+- ✅ **Documentation complete** - Installation, testing, and usage guides
+- ✅ **Test suite created** - Basic functionality validation
+
+### Testing Available
+
+Run comprehensive testing:
+
+```bash
+# Validate installation
+./validate-setup.sh
+
+# Run automated tests
+./tests/test-tmux-basic.sh
+
+# Follow manual testing guide
+cat TESTING.md
+```
 
 ### Success Metrics
 
-- ✅ **Prioritization**: Manager confers with developer before work starts
-- ✅ **TDD Compliance**: 100% RED→GREEN→REFACTOR adherence
-- ✅ **Quality Gates**: 0 commits with ESLint/TypeScript errors
-- ✅ **TMUX Stability**: No communication failures or hangs
-- ✅ **E2E Validation**: Reliable post-deployment testing
+- ✅ **Installation**: Automated setup with validation
+- ✅ **Quality Gates**: ESLint, TypeScript, tests, coverage enforcement
+- ✅ **TMUX Coordination**: Session creation, monitoring, delegation
+- ✅ **Git Integration**: Pre-commit and post-commit hooks
+- ✅ **Configuration**: Flexible config system for any project
+- ⏳ **Production Use**: Ready for real-world testing
 
 ## Roadmap
 
-### Phase 1: Validate Manager Prompt (Current)
-- Test TMUX coordination in real workflows
-- Validate TDD enforcement effectiveness
-- Measure quality gate compliance
+### Phase 1: Core Implementation ✅ (Complete)
+- ✅ Extract working scripts from lfw-draftforge-v1
+- ✅ Generalize for any project with configuration system
+- ✅ Create orchestration and coordination scripts
+- ✅ Implement setup and validation automation
+- ✅ Complete documentation (installation, testing, usage)
 
-### Phase 2: Integrate with Git Hooks
-- Implement `pre-push.sh` TMUX session spawning
-- Implement `post-deployment.sh` E2E triggering
-- Add agent monitoring scripts
+### Phase 2: Production Testing ⏳ (Next)
+- ⏳ Test with real-world projects
+- ⏳ Validate TDD enforcement effectiveness
+- ⏳ Measure quality gate compliance
+- ⏳ Gather user feedback and iterate
 
-### Phase 3: Scale to Multiple Agents
-- Add specialized agents (architect, quality) in dedicated windows
-- Test parallel agent coordination
-- Validate complex multi-agent workflows
+### Phase 3: Advanced Features (Future)
+- 🔮 Add specialized agent windows (architect, quality)
+- 🔮 Implement deployment webhooks and E2E triggers
+- 🔮 Add Journal MCP integration for cross-session learning
+- 🔮 Create agent coordination patterns library
 
 ## Contributing
 
@@ -317,6 +375,8 @@ See `TMUX_CLAUDE_CICD_ARCHITECTURE.md` for detailed analysis of each.
 
 ---
 
-**Status**: Experimental architecture - Ready for prompt testing and validation
+**Status**: ✅ Implementation Complete - Extracted from production, ready for testing
 
 **Version**: 1.0 (October 2025)
+
+**Source**: Extracted from lfw-draftforge-v1 production environment
